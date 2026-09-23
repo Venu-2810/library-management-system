@@ -1,144 +1,473 @@
-﻿# AgriSense DataHub
+# 📚 College Library Management System
 
-A real-time agricultural environmental data collection and monitoring platform. AgriSense automatically pulls live weather data for registered farm locations every few minutes, stores it for historical analysis, and presents it through a full-featured dashboard - built for farmers, agronomists, and researchers who need reliable, location-specific environmental data.
+A full-stack, role-based **College Library Management System** built with **React, Vite, Node.js, and Express**. The application manages a college library's book catalog, student accounts, borrowing and returns, overdue tracking, fines, notifications, and administrative operations through separate student and staff/admin workflows.
 
-## Overview
+> **Project type:** Full-stack academic/portfolio project  
+> **Frontend:** React + Vite  
+> **Backend:** Node.js + Express REST API  
+> **Data storage:** Local JSON file (`backend/data/library_data.json`)
 
-AgriSense DataHub continuously collects weather data (temperature, humidity, rainfall, wind, UV index, cloud cover, and more) for any number of registered locations, using a background scheduler that runs independently of the web interface. The collected data feeds into live dashboards, historical trend charts, and CSV/Excel exports - with full admin visibility into system health and collection reliability.
+---
 
-## Features
+## ✨ Overview
 
-- **Live Weather Dashboard** - auto-refreshing cards showing current conditions per location, with a manual "Trigger Collection" override
-- **Automated Data Collection** - background scheduler fetches live data from Open-Meteo on a configurable interval (default: every 5-10 minutes) for all active locations
-- **Historical Trends** - interactive line charts (temperature, humidity, rainfall, UV index) per location, powered by Recharts
-- **Location Management** - full CRUD for farm locations, including crop type, soil type, coordinates, and status (active/inactive)
-- **Admin & Monitoring** - real-time system health (collector/scheduler/DB status), collection success rate, system logs, and user management
-- **Data Export** - generate CSV/Excel exports filtered by location, crop, state, or date range, with direct in-browser download
-- **JWT Authentication** - secure login with access/refresh token flow and protected routes
-- **Historical Backfill** - script to bulk-import a year worth of historical weather data via Open-Meteo archive API
+The system provides three role-based experiences:
 
-## Tech Stack
+- 👨‍💼 **Administrator** — manages library settings, students, catalog, reports, notifications, and system analytics.
+- 👩‍💼 **Librarian / Staff** — handles daily book circulation, catalog operations, returns, and student records.
+- 🎓 **Student** — browses the catalog, tracks borrowed books, monitors due dates and overdue fines, manages notifications, and views their profile.
 
-**Backend**
-- FastAPI (Python) - async REST API
-- PostgreSQL + SQLAlchemy (async ORM)
-- Alembic - database migrations
-- APScheduler - background job scheduling
-- httpx + tenacity - resilient external API calls with retry logic
-- Open-Meteo API - weather, forecast, and historical archive data
-- JWT (python-jose / passlib) - authentication
+Authentication is based on unique **College Registration Numbers**, with passwords securely hashed using `bcryptjs` and authenticated API requests protected with JWT.
 
-**Frontend**
-- React 18 + TypeScript
-- Vite - build tooling
-- React Router - client-side routing
-- Recharts - data visualization
-- Axios - API client with interceptors for auth and error handling
-- Custom component library (no UI framework dependency)
+---
 
-## Project Structure
-agrisense/
+## 🚀 Key Features
+
+### 🔐 Authentication & Role-Based Access
+
+- Student registration and login
+- Administrator and librarian/staff accounts
+- College Registration Number-based identity
+- Password hashing with `bcryptjs`
+- JWT-based authentication
+- 7-day JWT session expiration
+- Role-protected backend API routes
+- Protected frontend routes
+- Active/suspended student account control
+
+### 📚 Book Catalog & Inventory
+
+- Search books by:
+  - Title
+  - Author
+  - ISBN
+  - Publisher
+  - Category
+- Filter by category, author, and availability
+- Book detail modal
+- Shelf location tracking
+- Total-copy and available-copy tracking
+- Add books
+- Edit book information
+- Delete books when they have no active loans
+- Automatic stock updates when books are issued or returned
+
+### 🔄 Borrowing & Return Management
+
+- Students can borrow available books
+- Staff/Admin can issue books to students
+- Automatic due-date calculation
+- Configurable borrowing duration
+- Return processing by Staff/Admin
+- Automatic available-copy restoration
+- Duplicate active-loan prevention
+- Overdue detection
+- Automatic overdue-day calculation
+- Automatic fine calculation
+- Borrowing history
+
+### 💰 Fine & Overdue Management
+
+- Default daily penalty: **Rs. 10/day**
+- Default borrowing period: **14 days**
+- Server-side overdue recalculation
+- Overdue status tracking
+- Late-day calculation
+- Penalty calculation
+- Outstanding penalty statistics
+
+### 🔔 Notifications
+
+- Book issue notifications
+- Book return notifications
+- New-book announcements
+- Overdue-related notifications
+- Student-specific notifications
+- Campus-wide student broadcasts
+- Staff/Admin notifications
+- Read/unread notification tracking
+- Mark one or all notifications as read
+
+### 📊 Admin Dashboard
+
+- Total books
+- Available books
+- Borrowed books
+- Overdue books
+- Registered students
+- Today's issues
+- Today's returns
+- Outstanding penalties
+- Circulation reports
+- Category distribution
+- Borrowing trends
+- Student directory
+- Student account activation/deactivation
+- Library settings
+- Notification broadcasts
+
+---
+
+## 🛠️ Tech Stack
+
+### Frontend
+
+- React 19
+- Vite
+- React Router
+- Tailwind CSS
+- Lucide React
+- Motion
+- Recharts
+
+### Backend
+
+- Node.js
+- Express.js
+- JWT (`jsonwebtoken`)
+- `bcryptjs`
+- CORS
+- Dotenv
+- Nodemon
+
+### Data Storage
+
+The current version uses a lightweight **JSON file-based data store**:
+
+```text
+backend/data/library_data.json
+```
+
+This keeps the project simple to run locally without requiring a separate database server.
+
+---
+
+## 🏗️ Project Architecture
+
+```text
+library-management-system/
+│
 ├── backend/
-│ ├── app/
-│ │ ├── collectors/ # Weather/AQI/forecast data collectors (Open-Meteo)
-│ │ ├── controllers/ # FastAPI route handlers
-│ │ ├── models/ # SQLAlchemy ORM models
-│ │ ├── repositories/ # Data access layer
-│ │ ├── schemas/ # Pydantic request/response schemas
-│ │ ├── services/ # Business logic layer
-│ │ ├── scheduler/ # Background collection job + APScheduler setup
-│ │ ├── scripts/ # One-off scripts (e.g. historical backfill)
-│ │ └── utils/ # Shared utilities (auth, HTTP client, dependencies)
-│ ├── alembic/ # Database migrations
-│ ├── main.py # FastAPI app entrypoint
-│ └── .env.example
+│   ├── server.js
+│   ├── package.json
+│   ├── .env.example
+│   ├── data/
+│   │   └── library_data.json
+│   └── src/
+│       ├── db.js
+│       ├── seed.js
+│       ├── middleware/
+│       │   └── auth.js
+│       └── routes/
+│           ├── authRoutes.js
+│           ├── bookRoutes.js
+│           ├── borrowRoutes.js
+│           ├── notificationRoutes.js
+│           └── adminRoutes.js
+│
 └── frontend/
-├── src/
-│ ├── api/ # API client functions per resource
-│ ├── components/ # Shared UI components (Layout, Dropdown, ProtectedRoute)
-│ ├── context/ # Auth context/provider
-│ ├── pages/ # Route-level pages (Dashboard, Locations, Trends, Admin, Export)
-│ └── types/ # TypeScript interfaces matching backend schemas
-└── .env.example
+    ├── index.html
+    ├── package.json
+    ├── vite.config.js
+    └── src/
+        ├── App.jsx
+        ├── main.jsx
+        ├── index.css
+        ├── services/
+        │   └── api.js
+        ├── context/
+        │   ├── AuthContext.jsx
+        │   └── ToastContext.jsx
+        ├── components/
+        │   ├── common/
+        │   └── layout/
+        └── pages/
+            ├── HomePage.jsx
+            ├── BooksPage.jsx
+            ├── AboutPage.jsx
+            ├── LoginPage.jsx
+            ├── RegisterPage.jsx
+            ├── student/
+            └── admin/
+```
 
+---
 
-## Getting Started
+## 👥 User Roles
+
+| Role | Main Responsibilities |
+|---|---|
+| **Administrator** | Full system control, settings, students, reports, catalog and broadcasts |
+| **Librarian / Staff** | Book circulation, returns, catalog management and student operations |
+| **Student** | Catalog browsing, borrowing, loan history, notifications and profile |
+
+---
+
+## 🧭 Application Routes
+
+### Public Routes
+
+| Route | Description |
+|---|---|
+| `/` | Library home page |
+| `/books` | Searchable book catalog |
+| `/about` | Library information and rules |
+| `/login` | User login |
+| `/register` | Student registration |
+
+### Student Routes
+
+| Route | Description |
+|---|---|
+| `/dashboard` | Student dashboard |
+| `/my-books` | Borrowing history and active loans |
+| `/profile` | Student profile |
+| `/notifications` | Student notifications |
+
+### Staff / Admin Routes
+
+| Route | Description |
+|---|---|
+| `/admin` | Admin/staff dashboard |
+| `/admin/books` | Manage book catalog |
+| `/admin/borrow-return` | Borrow and return desk |
+| `/admin/students` | Student directory |
+| `/admin/reports` | Circulation reports |
+| `/admin/notifications` | Library broadcasts |
+| `/admin/settings` | Library settings |
+
+---
+
+## ⚙️ Local Setup
 
 ### Prerequisites
-- Python 3.12+
-- Node.js 18+
-- PostgreSQL 14+
 
-### Backend Setup
+Make sure you have:
+
+- Node.js installed
+- npm installed
+- Git installed
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/Venu-2810/library-management-system.git
+cd library-management-system
+```
+
+### 2. Configure the backend
 
 ```bash
 cd backend
-python -m venv venv
-
-# Windows
-.\venv\Scripts\Activate.ps1
-# macOS/Linux
-source venv/bin/activate
-
-pip install -r requirements.txt
-
-cp .env.example .env
-# edit .env with your database URL and a secure JWT secret
-
-alembic upgrade head
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
+npm install
 ```
 
-The API will be live at `http://localhost:8000`, with interactive docs at `http://localhost:8000/docs`.
+Create a `.env` file inside the `backend` folder:
 
-On first run, a default admin user is seeded:
-- **Email:** `admin@agrisense.com`
-- **Password:** `admin123`
+```env
+PORT=5000
+JWT_SECRET=replace_with_a_long_random_secret
+```
 
-### Frontend Setup
+> Never commit the real `.env` file to GitHub.
+
+### 3. Start the backend
+
+```bash
+npm run dev
+```
+
+Backend:
+
+```text
+http://localhost:5000
+```
+
+Health check:
+
+```text
+http://localhost:5000/api/health
+```
+
+### 4. Start the frontend
+
+Open a second terminal:
 
 ```bash
 cd frontend
 npm install
-
-cp .env.example .env
-# confirm VITE_API_URL points to your backend
-
 npm run dev
 ```
 
-The app will be live at `http://localhost:5173`.
+Frontend:
 
-### Historical Data Backfill (optional)
-
-To populate the database with a year of historical weather data for testing/demo purposes:
-
-```bash
-cd backend
-python -m app.scripts.backfill_weather
+```text
+http://localhost:5173
 ```
 
-Edit `LOCATIONS` and the date range at the top of the script to match your registered locations.
+The Vite development server proxies `/api` requests to the Express backend on port `5000`.
 
-## Configuration
+---
 
-Key environment variables (see `.env.example` in each folder):
+## 🔑 Demo Accounts
 
-| Variable | Description |
-|---|---|
-| `DATABASE_URL` | PostgreSQL async connection string |
-| `JWT_SECRET_KEY` | Secret used to sign auth tokens - change in production |
-| `COLLECTION_INTERVAL_MINUTES` | How often the scheduler collects live data (default: 5) |
-| `COLLECTOR_CONCURRENCY_LIMIT` | Max locations collected in parallel per cycle |
-| `CORS_ORIGINS` | Comma-separated list of allowed frontend origins |
-| `VITE_API_URL` | Backend API base URL used by the frontend |
+The seed script creates demo accounts for local development.
 
-## Notes
+| Role | Registration Number | Password |
+|---|---|---|
+| Administrator | `STAFF-ADMIN-001` | `Admin@123` |
+| Librarian / Staff | `STAFF-LIB-001` | `Staff@123` |
+| Student | `STUDENT-001` | `Student@123` |
 
-- The scheduler runs as a background task inside the FastAPI process - the backend must stay running continuously for automated collection to continue. It does not require any manual triggering.
-- Exported files are currently written to disk on the server (`backend/exports/`) and served via an authenticated download endpoint.
-- AQI and forecast data models exist in the schema but are not yet exposed via dedicated API routes - a natural next extension.
+> These credentials are for **local development/demo purposes only**. Do not use them for a production deployment.
 
-## License
+---
 
-This project is for educational and portfolio purposes.
+## 🔒 Security Notes
+
+- Passwords are stored as `bcryptjs` hashes rather than plain text.
+- JWTs are used for authenticated API requests.
+- JWTs expire after 7 days.
+- Backend endpoints use role-based authorization.
+- `.env` is excluded from Git through `.gitignore`.
+- Only `.env.example` should be committed as a configuration template.
+- Do not place database credentials, production secrets, or real user passwords in the repository.
+
+---
+
+## 🗃️ Data Model
+
+The local data store maintains the following main collections:
+
+```text
+users
+books
+borrows
+notifications
+settings
+```
+
+The data is persisted in:
+
+```text
+backend/data/library_data.json
+```
+
+The backend automatically creates the data file if it does not exist and seeds initial demo data when no users are present.
+
+---
+
+## 🔌 API Overview
+
+### Authentication
+
+```text
+POST /api/auth/register
+POST /api/auth/login
+GET  /api/auth/me
+```
+
+### Books
+
+```text
+GET    /api/books
+GET    /api/books/:id
+POST   /api/books
+PUT    /api/books/:id
+DELETE /api/books/:id
+```
+
+### Borrowing
+
+```text
+GET  /api/borrow/my-books
+GET  /api/borrow/all
+POST /api/borrow/request
+POST /api/borrow/:id/return
+```
+
+### Notifications
+
+```text
+GET   /api/notifications
+PATCH /api/notifications/:id/read
+POST  /api/notifications/mark-all-read
+POST  /api/notifications/broadcast
+```
+
+### Administration
+
+```text
+GET   /api/admin/stats
+GET   /api/admin/students
+PATCH /api/admin/students/:id/status
+GET   /api/admin/settings
+PUT   /api/admin/settings
+```
+
+---
+
+## 🧪 Development Notes
+
+This project is designed primarily as a **college academic and portfolio project**.
+
+The current version uses local JSON persistence rather than a production database. For a production deployment, the data layer can be replaced with MongoDB, PostgreSQL, MySQL, or another database without changing the overall frontend/backend separation.
+
+---
+
+## 🔮 Future Improvements
+
+- MongoDB/PostgreSQL database integration
+- Cloud deployment
+- Email/SMS reminders
+- Book renewal workflow
+- Book reservation/waitlist
+- QR/barcode scanning
+- PDF circulation reports
+- Automated scheduled overdue notifications
+- Fine payment tracking
+- Automated database backups
+- Production-grade environment configuration
+
+---
+
+## 📸 Screenshots
+
+Add screenshots of the following pages here when available:
+
+- Home page
+- Book catalog
+- Login page
+- Student dashboard
+- My Books
+- Admin dashboard
+- Borrow/Return desk
+- Manage Books
+- Circulation Reports
+
+Example:
+
+```md
+![Home Page](screenshots/home.png)
+![Book Catalog](screenshots/books.png)
+![Student Dashboard](screenshots/student-dashboard.png)
+![Admin Dashboard](screenshots/admin-dashboard.png)
+```
+
+---
+
+## 📄 License
+
+This project is currently intended for educational and portfolio use.
+
+---
+
+## 👤 Author
+
+**Venu**
+
+GitHub: [Venu-2810](https://github.com/Venu-2810)
+
+---
+
+⭐ If you find this project useful, consider giving the repository a star.
